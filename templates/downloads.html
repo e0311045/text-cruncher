@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Download File{% endblock %}
+<!-- Page Content -->
+{% block h1 %}
+Your File is Ready to be Downloaded
+{% endblock %}
+
+{% block content %}
+          <div class="container" align="center">
+		    <a href="/return-file/{{ filename }}" target="blank">
+                <button type="button" class='btn btn-primary btn-xxlg'>
+                    <img src="https://img.icons8.com/android/24/000000/download.png" width="25">
+                     Download Now
+                </button>
+            </a>
+          </div>
+{% endblock %}

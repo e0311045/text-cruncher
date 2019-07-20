@@ -162,7 +162,7 @@ def get_content(url):
 """-------------------------------FLASK APPLICATION------------------------------------"""
 app = Flask(__name__)
 
-app.config['DEBUG'] = True #Debug Mode
+"""Flask Mail Configuration"""
 app.config['TESTING'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -218,4 +218,4 @@ def about():
 
 #runs the application in debug mode
 if __name__ == "__main__":
-    app.run()
+    app.run(host='127.0.0.1', port=8080, debug=True)

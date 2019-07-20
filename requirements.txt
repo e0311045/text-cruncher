@@ -1,0 +1,9 @@
+Flask
+Werkzeug
+Flask-Mail
+gensim
+selenium
+requests
+bs4
+pandas
+XlsxWriter

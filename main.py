@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from gensim.summarization import summarize
 import pandas as pd
 from flask import Flask, render_template, request, send_file
+from flask_mail import Mail, Message
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 # import tensorflow as tf
@@ -11,12 +12,11 @@ from selenium.webdriver.chrome.options import Options
 # from model import Model
 # from utils import build_dict, build_dataset, batch_iter
 from datetime import datetime
-"""created"""
+
 """Global Variables"""
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 final_output = []
 final_header = ['Serial No',"Search Query","URL Link","Title of Article","Text Summary"]
-current_timestamp = ""
 
 """Set up Selenium driver"""
 chrome_options = Options()
@@ -153,60 +153,47 @@ def get_content(url):
             results = results + temp
 
     #otherwise output with BS4 and summariser
-    # results = abstractSummarize(summarize(results))
     results = summarize(results)
     print(results)
     final_text_summary.append(header)
     final_text_summary.append(results)
     return final_text_summary
 
-# def abstractSummarize(text):
-#     with open("args.pickle", "rb") as f:
-#         args = pickle.load(f)
-#
-#     print("Loading dictionary...")
-#     word_dict, reversed_dict, article_max_len, summary_max_len = build_dict("valid", args.toy)
-#     print("Loading validation dataset...")
-#     valid_x = build_dataset("valid", word_dict, article_max_len, summary_max_len, text, args.toy)
-#     valid_x_len = [len([y for y in x if y != 0]) for x in valid_x]
-#
-#     with tf.Session() as sess:
-#         print("Loading saved model...")
-#         model = Model(reversed_dict, article_max_len, summary_max_len, args, forward_only=True)
-#         saver = tf.train.Saver(tf.global_variables())
-#         ckpt = tf.train.get_checkpoint_state("./saved_model/")
-#         saver.restore(sess, ckpt.model_checkpoint_path)
-#
-#         batches = batch_iter(valid_x, [0] * len(valid_x), args.batch_size, 1)
-#
-#         print("Writing summaries to 'result.txt'...")
-#         for batch_x, _ in batches:
-#             batch_x_len = [len([y for y in x if y != 0]) for x in batch_x]
-#
-#             valid_feed_dict = {
-#                 model.batch_size: len(batch_x),
-#                 model.X: batch_x,
-#                 model.X_len: batch_x_len,
-#             }
-#
-#             prediction = sess.run(model.prediction, feed_dict=valid_feed_dict)
-#             prediction_output = [[reversed_dict[y] for y in x] for x in prediction[:, 0, :]]
-#
-#             for line in prediction_output:
-#                 summary = ""
-#                 for word in line:
-#                     if word == "</s>":
-#                         break
-#                     if word not in summary:
-#                         summary = summary + " " + word
-#             print(summary)
-#             sess.close()
-#             return summary
-
-
-"""---------------FLASK APPLICATION-------------------"""
+"""-------------------------------FLASK APPLICATION------------------------------------"""
 app = Flask(__name__)
+
+app.config['DEBUG'] = True #Debug Mode
+app.config['TESTING'] = False
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_DEBUG'] = True #same as Debug mode
+app.config['MAIL_USERNAME'] = 'textcruncher@gmail.com'
+app.config['MAIL_PASSWORD'] = 'r3s0lute'
+app.config['MAIL_DEFAULT_SENDER'] = None
+app.config['MAIL_MAX_EMAILS'] = None
+app.config['MAIL_SUPPRESS_SEND'] = False #same as TESTING
+app.config['MAIL_ASCII_ATTACHMENTS'] = False #keyboard characters
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+"""Flask Mail Sending"""
+mail= Mail(app)
+
+@app.route('/send-mail/', methods=['POST'])
+def send_mail():
+    receiver = []
+    emailadd = request.form['email_address']
+    receiver = emailadd.split(',')
+    # receiver.append()  # receives from html form as String
+    text = request.form['msg_txt']  # receives from html form as String
+    filename = request.form['fileName']
+    with app.open_resource('./static/user_pulls/Output_'+filename+'.xlsx') as fp:
+        msg = Message('Hello', sender='textcruncher@gmail.com', recipients=receiver)
+        msg.attach('Output_'+filename+'.xlsx', 'file/xlsx', fp.read())
+        msg.body = text
+        mail.send(msg)
+    return render_template('downloads.html', filename=filename)
 
 @app.route('/')
 def home():
@@ -231,4 +218,4 @@ def about():
 
 #runs the application in debug mode
 if __name__ == "__main__":
-	app.run(debug=True)
+    app.run()

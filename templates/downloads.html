@@ -1,17 +1,94 @@
 {% extends "base.html" %}
+<!--Header Region-->
 {% block title %}Download File{% endblock %}
-<!-- Page Content -->
-{% block h1 %}
-Your File is Ready to be Downloaded
+
+{% block additionalCSS %}
 {% endblock %}
 
-{% block content %}
-          <div class="container" align="center">
-		    <a href="/return-file/{{ filename }}" target="blank">
-                <button type="button" class='btn btn-primary btn-xxlg'>
-                    <img src="https://img.icons8.com/android/24/000000/download.png" width="25">
-                     Download Now
-                </button>
-            </a>
+<!-- Page Content Body Region -->
+{% block mainContent %}
+<div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h1 class="mt-5">Thank You for Your Patience!</h1>
+          <h3 class="text-muted">Your File is Ready to be Downloaded</h3>
+              <div class="container-fluid" align="center">
+                  <a href="{{ url_for('home') }}" data-toggle="tooltip" data-placement="left" title="Back to submit more queries!">
+                    <img src="https://img.icons8.com/windows/64/000000/circled-left-2.png" alt="Submit" width="38">
+                  </a>
+                  <a href="/return-file/{{ filename }}" target="blank">
+                      <button type="button" class='btn btn-primary btn-xlg'>
+                        <img src="https://img.icons8.com/plasticine/100/000000/download.png" width="38" height="38">
+                         Download Now
+                        </button>
+                  </a>
+                  <span class="text-muted"> OR </span>
+                  <!--Triggers Modal-->
+                    <button type="button" class='btn btn-warning btn-xlg' data-toggle="modal" data-target="#exampleModal" data-whatever="Recipient">
+                        <img src="https://img.icons8.com/cotton/64/000000/download-mail.png" width="38" height="38">
+                         Send to Mail
+                    </button>
+
+              </div>
+      </div>
+    </div>
+</div>
+<!--       Modal         -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+    <div class="modal-body text-left">
+        <form action="{{ url_for('send_mail') }}" method="post">
+            <input type="hidden" id="fileName" name="fileName" value="{{ filename }}">
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Recipient:</label>
+            <input type="email" class="form-control" name="email_address" id="recipient-name" placeholder="example@example.com" required>
           </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Message:</label>
+            <textarea class="form-control" name="msg_txt" id="message-text" placeholder="Enter your message here"></textarea>
+          </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <img src="https://img.icons8.com/ios-glyphs/30/000000/delete-sign.png" width="20">
+            Close
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <img src="https://img.icons8.com/ios/50/000000/send.png" width="25">
+            Send Email
+        </button>
+    </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block additionalscripts %}
+<script>
+    $('#exampleModal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Button that triggered the modal
+      var recipient = button.data('whatever') // Extract info from data-* attributes
+      // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+      // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+      var modal = $(this)
+      modal.find('.modal-title').text('New message to ' + recipient)
+    })
+</script>
+
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
 {% endblock %}

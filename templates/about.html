@@ -1,12 +1,21 @@
 {% extends "base.html" %}
+<!--Header Region-->
 {% block title %}About Us{% endblock %}
-<!-- Page Content -->
-{% block h1 %}
-About TextCruncher
+
+{% block additionalCSS %}
 {% endblock %}
 
-{% block content %}
-          <div class="container">
-            <h3>We are <strong>team TextCruncher</strong> and this mini project is our work in progress</h3>
-	      </div
+<!-- Page Content Body Region -->
+{% block mainContent %}
+<img src="./static/images/text-crunchlogo.jpg" class="animated pulse" id="animated-logo">
+<div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h3 class="mt-5">We are <strong>team TextCruncher</strong> and this mini project is our work in progress</h3>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additionalscripts %}
 {% endblock %}

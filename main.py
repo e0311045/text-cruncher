@@ -11,7 +11,7 @@ from selenium.webdriver.chrome.options import Options
 # from model import Model
 # from utils import build_dict, build_dataset, batch_iter
 from datetime import datetime
-
+"""created"""
 """Global Variables"""
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 final_output = []

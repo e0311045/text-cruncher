@@ -1,6 +1,6 @@
 Flask==1.0.2
 flask_mail==0.9.1
-gunicorn
+Werkzeug
 requests
 bs4
 gensim

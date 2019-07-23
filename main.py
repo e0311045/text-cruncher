@@ -7,10 +7,6 @@ from flask import Flask, render_template, request, send_file
 from flask_mail import Mail, Message
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-# import tensorflow as tf
-# import pickle
-# from model import Model
-# from utils import build_dict, build_dataset, batch_iter
 from datetime import datetime
 
 """Global Variables"""
@@ -91,12 +87,11 @@ def scrape(lst_query,filename):
     worksheet.set_column('C:C', 40, format)
     worksheet.set_column('D:D', 20, format)
     worksheet.set_column('E:E', 70, format)
-
+    # Clear df
+    df_results = None
     writer.save()
     writer.close()
 
-    #Clear df
-    df_results = None
 
 #Main content Generator with BS4 and Selenium if BS4 fails to scrape
 def get_content(url):

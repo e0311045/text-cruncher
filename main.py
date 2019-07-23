@@ -3,72 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 from gensim.summarization import summarize
 import pandas as pd
-from flask import Flask, render_template, request, send_file
-from flask_mail import Mail, Message
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from datetime import datetime
-
-"""-------------------------------FLASK APPLICATION------------------------------------"""
-app = Flask(__name__)
-
-"""Flask Mail Configuration"""
-app.config['TESTING'] = False
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_DEBUG'] = True #same as Debug mode
-app.config['MAIL_USERNAME'] = 'textcruncher@gmail.com'
-app.config['MAIL_PASSWORD'] = 'r3s0lute'
-app.config['MAIL_DEFAULT_SENDER'] = None
-app.config['MAIL_MAX_EMAILS'] = None
-app.config['MAIL_SUPPRESS_SEND'] = False #same as TESTING
-app.config['MAIL_ASCII_ATTACHMENTS'] = False #keyboard characters
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-
-"""Flask Mail Sending"""
-mail= Mail(app)
-
-@app.route('/send-mail/', methods=['POST'])
-def send_mail():
-    receiver = []
-    emailadd = request.form['email_address']
-    receiver = emailadd.split(',')
-    # receiver.append()  # receives from html form as String
-    text = request.form['msg_txt']  # receives from html form as String
-    filename = request.form['fileName']
-    with app.open_resource('./static/user_pulls/Output_'+filename+'.xlsx') as fp:
-        msg = Message('Hello', sender='textcruncher@gmail.com', recipients=receiver)
-        msg.attach('Output_'+filename+'.xlsx', 'file/xlsx', fp.read())
-        msg.body = text
-        mail.send(msg)
-    return render_template('downloads.html', filename=filename)
-
-@app.route('/')
-def home():
-    return render_template('home.html')
-
-@app.route('/', methods=['POST'])
-def scrape_now():
-    #OBtains data from html form and pass it through python to another html page
-    queries = request.form['queries'] #receives from html form as String
-    lst_queries = queries.split(',') #split by ','
-    current_timestamp = datetime.now().strftime('%m%d%Y%H%M%S')
-    scrape(lst_queries,current_timestamp)
-    return render_template('downloads.html', filename=current_timestamp)
-
-@app.route('/return-file/<filename>')
-def return_file(filename):
-    return send_file('./static/user_pulls/Output_'+filename+'.xlsx', attachment_filename='Output.xlsx', cache_timeout=0)
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-#runs the application in debug mode
-if __name__ == "__main__":
-    app.run(debug=True)
+from flask import Flask, render_template, request, send_file
+from flask_mail import Mail, Message
 
 
 """ --------------------Scrape content-------------------------- """
@@ -81,9 +20,10 @@ final_header = ['Serial No',"Search Query","URL Link","Title of Article","Text S
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--start-maximized")
-# chrome_options.add_argument("-incognito")
+chrome_options.add_argument("-incognito")
 chrome_options.add_argument("--disable-popup-blocking")
-sel_driver = webdriver.Chrome(executable_path=r"ChromeDriverWin32/chromedriver.exe", chrome_options=chrome_options)
+sel_driver = webdriver.Chrome(executable_path='./ChromeDriverWin32/chromedriver.exe',chrome_options=chrome_options)
+
 
 def scrape(lst_query,filename):
     for query in lst_query:
@@ -217,3 +157,65 @@ def get_content(url):
     final_text_summary.append(results)
     return final_text_summary
 
+
+
+"""-------------------------------FLASK APPLICATION------------------------------------"""
+app = Flask(__name__)
+
+"""Flask Mail Configuration"""
+app.config['TESTING'] = False
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_DEBUG'] = True #same as Debug mode
+app.config['MAIL_USERNAME'] = 'textcruncher@gmail.com'
+app.config['MAIL_PASSWORD'] = 'r3s0lute'
+app.config['MAIL_DEFAULT_SENDER'] = None
+app.config['MAIL_MAX_EMAILS'] = None
+app.config['MAIL_SUPPRESS_SEND'] = False #same as TESTING
+app.config['MAIL_ASCII_ATTACHMENTS'] = False #keyboard characters
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+"""Flask Mail Sending"""
+mail= Mail(app)
+
+@app.route('/send-mail/', methods=['POST'])
+def send_mail():
+    receiver = []
+    emailadd = request.form['email_address']
+    receiver = emailadd.split(',')
+    # receiver.append()  # receives from html form as String
+    text = request.form['msg_txt']  # receives from html form as String
+    filename = request.form['fileName']
+    with app.open_resource('./static/user_pulls/Output_'+filename+'.xlsx') as fp:
+        msg = Message('Hello', sender='textcruncher@gmail.com', recipients=receiver)
+        msg.attach('Output_'+filename+'.xlsx', 'file/xlsx', fp.read())
+        msg.body = text
+        mail.send(msg)
+    return render_template('downloads.html', filename=filename)
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/', methods=['POST'])
+def scrape_now():
+    #OBtains data from html form and pass it through python to another html page
+    queries = request.form['queries'] #receives from html form as String
+    lst_queries = queries.split(',') #split by ','
+    current_timestamp = datetime.now().strftime('%m%d%Y%H%M%S')
+    scrape(lst_queries,current_timestamp)
+    return render_template('downloads.html', filename=current_timestamp)
+
+@app.route('/return-file/<filename>')
+def return_file(filename):
+    return send_file('./static/user_pulls/Output_'+filename+'.xlsx', attachment_filename='Output.xlsx', cache_timeout=0)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+#runs the application in debug mode
+if __name__ == "__main__":
+    app.run(debug=True)

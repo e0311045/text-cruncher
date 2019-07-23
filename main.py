@@ -20,7 +20,7 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--start-maximized")
 # chrome_options.add_argument("-incognito")
 chrome_options.add_argument("--disable-popup-blocking")
-sel_driver = webdriver.Chrome(executable_path=r"C:\ChromeDriverWin32\chromedriver.exe", chrome_options=chrome_options)
+sel_driver = webdriver.Chrome(executable_path=r"ChromeDriverWin32/chromedriver.exe", chrome_options=chrome_options)
 
 def scrape(lst_query,filename):
     for query in lst_query:
@@ -213,4 +213,4 @@ def about():
 
 #runs the application in debug mode
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(debug=True)

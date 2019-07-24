@@ -9,7 +9,6 @@ from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from flask_mail import Mail, Message
 
-
 """ --------------------Scrape content-------------------------- """
 """Global Variables"""
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
@@ -22,8 +21,7 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--start-maximized")
 chrome_options.add_argument("-incognito")
 chrome_options.add_argument("--disable-popup-blocking")
-sel_driver = webdriver.Chrome(executable_path='./ChromeDriverWin32/chromedriver.exe',chrome_options=chrome_options)
-
+sel_driver = webdriver.Chrome(executable_path='static/ChromeDriverWin32/chromedriver.exe',chrome_options=chrome_options)
 
 def scrape(lst_query,filename):
     for query in lst_query:
@@ -189,7 +187,7 @@ def send_mail():
     text = request.form['msg_txt']  # receives from html form as String
     filename = request.form['fileName']
     with app.open_resource('./static/user_pulls/Output_'+filename+'.xlsx') as fp:
-        msg = Message('Hello', sender='textcruncher@gmail.com', recipients=receiver)
+        msg = Message('Below is an Attached File of your Query Results', sender='textcruncher@gmail.com', recipients=receiver)
         msg.attach('Output_'+filename+'.xlsx', 'file/xlsx', fp.read())
         msg.body = text
         mail.send(msg)

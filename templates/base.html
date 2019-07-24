@@ -13,6 +13,8 @@
   <title>TextCruncher- {% block title %}{% endblock %}</title>
   <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="{{ url_for('static',    filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',    filename='css/sweetalert.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static',    filename='css/customise.css') }}">
   {% block additionalCSS %}
   {% endblock %}
 
@@ -53,6 +55,7 @@
   <script src="{{ url_for('static',    filename='js/slim.min.js') }}"></script>
   <script src="{{ url_for('static',    filename='js/popper.min.js') }}"></script>
   <script src="{{ url_for('static',    filename='js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static',    filename='js/sweetalert.min.js') }}"></script>
   {% block additionalscripts %}
   {% endblock %}
 </body>

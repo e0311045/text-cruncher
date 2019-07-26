@@ -95,6 +95,7 @@ def scrape(lst_query,filename):
     format = workbook.add_format()
     format.set_align('top')
     format.set_text_wrap()
+    format.set_border()
     # Setting the format
     worksheet.set_column('A:A', 10, format)
     worksheet.set_column('B:B', 20, format)

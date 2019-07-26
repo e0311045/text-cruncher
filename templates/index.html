@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Main{% endblock %}
 
 <!-- Page Content -->
 {% block mainContent %}
@@ -37,6 +37,15 @@
                     <span class="text-muted">Please separate your queries with a ',' comma in between each</span>
                 </span>
                 <br/>
+<!--                <div class="form-group row">-->
+<!--                    <div class="col-xs-2 text-center">-->
+<!--                      <label for="selection">Please indicate</label>-->
+<!--                      <select name="inc_exc" class="form-control" id="selection" required>-->
+<!--                        <option value="True">Yes</option>-->
+<!--                        <option value="False">No</option>-->
+<!--                      </select>-->
+<!--                    </div>-->
+<!--                </div>-->
                 <button type="button" id="btnFetch" class="btn btn-primary mb-2" onclick="validator();">Run</button>
             </form>
           </div>

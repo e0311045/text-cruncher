@@ -7,3 +7,4 @@ gensim
 pandas
 selenium
 XlsxWriter
+MarkupSafe

@@ -229,6 +229,8 @@ def get_content(url):
 """-------------------------------FLASK APPLICATION------------------------------------"""
 app = Flask(__name__)
 
+email_pw = os.environ.get('EMAIL_PW')
+
 """Flask Mail Configuration"""
 app.config['TESTING'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -237,7 +239,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEBUG'] = False #same as Debug mode
 app.config['MAIL_USERNAME'] = 'textcruncher@gmail.com'
-app.config['MAIL_PASSWORD'] = 'r3s0lute'
+app.config['MAIL_PASSWORD'] = email_pw
 app.config['MAIL_DEFAULT_SENDER'] = None
 app.config['MAIL_MAX_EMAILS'] = None
 app.config['MAIL_SUPPRESS_SEND'] = False #same as TESTING

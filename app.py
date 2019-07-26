@@ -20,14 +20,14 @@ abstract_Txt = ""
 
 """Set up Selenium driver"""
 chrome_options = Options()
+chrome_options.binary_location = GOOGLE_CHROME_BIN
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--start-maximized")
 # chrome_options.add_argument("-incognito")
 chrome_options.add_argument("--disable-popup-blocking")
-chrome_options.binary_location = GOOGLE_CHROME_BIN
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
-sel_driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
+sel_driver = webdriver.Chrome(executable_path=CHROME_DRIVER,chrome_options=chrome_options)
 
 def scrape(lst_query,withAbstract,filename):
 

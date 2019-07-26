@@ -32,7 +32,7 @@ chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
 sel_driver = webdriver.Chrome(executable_path=chromedriver_path,chrome_options=chrome_options)
 
-def scrape(lst_query,withAbstract,filename):
+def scrape(lst_query,filename):
 
     for query in lst_query:
         """Scrape scheduled link from Selenium"""
@@ -71,7 +71,7 @@ def scrape(lst_query,withAbstract,filename):
                 sub_output.append(url)
             """attempts to get URL content"""
             try:
-                results = get_content(url,withAbstract,filename) #gets content from URL
+                results = get_content(url) #gets content from URL
                 if results[1] != "":
                     sub_output.append(results[0]) #Title
                     sub_output.append(results[1]) #Main content
@@ -108,7 +108,7 @@ def scrape(lst_query,withAbstract,filename):
     writer.close()
 
 #Main content Generator with BS4 and Selenium if BS4 fails to scrape
-def get_content(url,withAbstract,filename):
+def get_content(url):
     headers = requests.utils.default_headers()
     headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',

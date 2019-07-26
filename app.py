@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options
 from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from flask_mail import Mail, Message
+import os
 
 """ --------------------Scrape content-------------------------- """
 """Global Variables"""
@@ -18,16 +19,18 @@ final_output = []
 final_header = ['Serial No',"Search Query","URL Link","Title of Article","Text Summary"]
 abstract_Txt = ""
 
+google_chrome_bin = os.environ.get('GOOGLE_CHROME_BIN')
+chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
 """Set up Selenium driver"""
 chrome_options = Options()
-chrome_options.binary_location = ENV['GOOGLE_CHROME_BIN']
+chrome_options.binary_location = google_chrome_bin
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--start-maximized")
 # chrome_options.add_argument("-incognito")
 chrome_options.add_argument("--disable-popup-blocking")
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
-sel_driver = webdriver.Chrome(executable_path=ENV['CHROMEDRIVER_PATH'],chrome_options=chrome_options)
+sel_driver = webdriver.Chrome(executable_path=chromedriver_path,chrome_options=chrome_options)
 
 def scrape(lst_query,withAbstract,filename):
 

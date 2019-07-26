@@ -234,7 +234,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_DEBUG'] = True #same as Debug mode
+app.config['MAIL_DEBUG'] = False #same as Debug mode
 app.config['MAIL_USERNAME'] = 'textcruncher@gmail.com'
 app.config['MAIL_PASSWORD'] = 'r3s0lute'
 app.config['MAIL_DEFAULT_SENDER'] = None
@@ -290,4 +290,5 @@ def about():
 
 #runs the application in debug mode
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

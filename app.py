@@ -204,14 +204,11 @@ mail= Mail(app)
 
 @app.route('/send-mail/', methods=['POST'])
 def send_mail():
-    receiver = []
     emailadd = request.form['email_address']
-    receiver = emailadd.split(',')
-    # receiver.append()  # receives from html form as String
     text = request.form['msg_txt']  # receives from html form as String
     filename = request.form['fileName']
     with app.open_resource('./static/user_pulls/Output_'+filename+'.xlsx') as fp:
-        msg = Message('Below is an Attached File of your Query Results', sender='textcruncher@gmail.com', recipients=receiver)
+        msg = Message('Below is an Attached File of your Query Results', sender='textcruncher@gmail.com', recipients=emailadd)
         msg.attach('Output_'+filename+'.xlsx', 'file/xlsx', fp.read())
         msg.body = text
         mail.send(msg)

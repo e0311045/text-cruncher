@@ -10,12 +10,16 @@ from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from flask_mail import Mail, Message
 import os
+import re
 
-""" --------------------Scrape content-------------------------- """
+""" --------------------Main Script-------------------------- """
+#Readability
+def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
+def prCyan(skk): print("\033[96m {}\033[00m" .format(skk))
+
 """Global Variables"""
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 final_output = []
-# final_header = ['Serial No',"Search Query","URL Link","Title of Article","Text Summary","Abstract"]
 final_header = ['Serial No',"Search Query","URL Link","Title of Article","Text Summary"]
 abstract_Txt = ""
 
@@ -31,7 +35,7 @@ chrome_options.add_argument("--disable-popup-blocking")
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
 sel_driver = webdriver.Chrome(executable_path=chromedriver_path,chrome_options=chrome_options)
-
+# sel_driver = webdriver.Chrome(executable_path='./static/ChromeDriverWin32/chromedriver.exe',chrome_options=chrome_options) #Local host Test
 def scrape(lst_query,filename):
 
     for query in lst_query:
@@ -75,9 +79,6 @@ def scrape(lst_query,filename):
                 if results[1] != "":
                     sub_output.append(results[0]) #Title
                     sub_output.append(results[1]) #Main content
-                    # if(counter==final_counter):
-                    #     abstract_Txt = abstractSummarize('Process.txt')
-                    # sub_output.append(abstract_Txt)
                     final_output.append(sub_output)
                     counter += 1
             except:
@@ -110,6 +111,7 @@ def scrape(lst_query,filename):
 
 #Main content Generator with BS4 and Selenium if BS4 fails to scrape
 def get_content(url):
+    prCyan('BS4 Pull Request...')
     headers = requests.utils.default_headers()
     headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
@@ -135,12 +137,14 @@ def get_content(url):
             continue
 
         results = results + temp
-
+    prGreen('BS4 Original Content:')
+    print(results)
     #Check if content can be pulled with BS4
     """word count minimum"""
-    validThreshold = 100
+    validThreshold = 200
     if len(results.split(" ")) < validThreshold:
         #Selenium Pull
+        prGreen('Selenium Pull Request...')
         sel_driver.implicitly_wait(1)  # reduce error
         sel_driver.get(url)
         soup = BeautifulSoup(sel_driver.page_source, "html.parser")
@@ -150,7 +154,6 @@ def get_content(url):
             header = headers[0].text
         else:
             header = ""
-        print(header)
         for link in links:
             try:
                 temp = link.text
@@ -160,76 +163,26 @@ def get_content(url):
                 except:
                     continue
             results = results + temp
+        prCyan('Selenium Original Content:')
+        print(results)
 
-    # if(withAbstract):
-    #     #Save a text file with original text for abstract summary
-    #     with codecs.open("Process.txt","a",encoding='utf8') as f:
-    #         try:
-    #             f.write(results)
-    #         except(UnicodeEncodeError):
-    #             f.write(results.translate(non_bmp_map))
-
-    #otherwise output with BS4 and summariser
+    """Output with summariser"""
+    # apply final regex clean up before summarising
+    results = re.sub(r"\{(.*?)\}+", '', results) #removes anything enclosing {}
+    results = re.sub(r"(#[A-Za-z]+)",'', results) #removes hashtags
+    results = re.sub(r"(^.+@[^\.].*\.[a-z]{2,}$",'', results)  #removes email
     results = summarize(results)
+    prGreen('Summary results: \n')
     print(results)
     final_text_summary.append(header)
     final_text_summary.append(results)
     return final_text_summary
 
 
-# def abstractSummarize(filepath):
-#     with open("args.pickle", "rb") as f:
-#         args = pickle.load(f)
-#
-#     print("Loading dictionary...")
-#     word_dict, reversed_dict, article_max_len, summary_max_len = build_dict("valid", args.toy)
-#     print("Loading validation dataset...")
-#     valid_x = build_dataset("valid", word_dict, article_max_len, summary_max_len, filepath, args.toy)
-#     valid_x_len = [len([y for y in x if y != 0]) for x in valid_x]
-#
-#     with tf.Session() as sess:
-#         print("Loading saved model...")
-#         model = Model(reversed_dict, article_max_len, summary_max_len, args, forward_only=True)
-#         saver = tf.train.Saver(tf.global_variables())
-#         ckpt = tf.train.get_checkpoint_state("./saved_model/")
-#         saver.restore(sess, ckpt.model_checkpoint_path)
-#
-#         batches = batch_iter(valid_x, [0] * len(valid_x), args.batch_size, 1)
-#
-#         print("Writing summaries")
-#         for batch_x, _ in batches:
-#             batch_x_len = [len([y for y in x if y != 0]) for x in batch_x]
-#
-#             valid_feed_dict = {
-#                 model.batch_size: len(batch_x),
-#                 model.X: batch_x,
-#                 model.X_len: batch_x_len,
-#             }
-#
-#             prediction = sess.run(model.prediction, feed_dict=valid_feed_dict)
-#             prediction_output = [[reversed_dict[y] for y in x] for x in prediction[:, 0, :]]
-#             # return line
-#             abstract = ""
-#             # Writing to text file
-#             #with open("result.txt", "a") as f:
-#
-#             for line in prediction_output:
-#                 summary = list()
-#                 for word in line:
-#                     if word == "</s>":
-#                         break
-#                     if word == "black" or word == "bosch" or word == "<" or word == "unk" or word == ">":
-#                         continue
-#                     if word not in summary:
-#                         summary.append(word)
-#                         abstract = abstract + " " + word
-#         os.remove('./static/abst_file/Process'+filename+'.txt')
-#         return abstract
-
 """-------------------------------FLASK APPLICATION------------------------------------"""
 app = Flask(__name__)
 
-email_pw = os.environ.get('EMAIL_PW')
+email_pw = os.environ.get('EMAIL_PW') #fetch from environment credentials
 
 """Flask Mail Configuration"""
 app.config['TESTING'] = False
@@ -272,14 +225,8 @@ def home():
 def scrape_now():
     #OBtains data from html form and pass it through python to another html page
     queries = request.form['queries'] #receives from html form as String
-    # withAbstract = request.form['inc_exc']
     lst_queries = queries.split(',') #split by ','
     current_timestamp = datetime.now().strftime('%m%d%Y%H%M%S')
-    # if(withAbstract=='True'):
-    #     withAbstract = True
-    # else:
-    #     withAbstract = False
-    # scrape(lst_queries,withAbstract,current_timestamp)
     scrape(lst_queries, current_timestamp)
     return render_template('downloads.html', filename=current_timestamp)
 
@@ -295,3 +242,4 @@ def about():
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+    # app.run(debug=True)

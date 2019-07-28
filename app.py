@@ -141,7 +141,7 @@ def get_content(url):
     print(results)
     #Check if content can be pulled with BS4
     """word count minimum"""
-    validThreshold = 200
+    validThreshold = 300
     if len(results.split(" ")) < validThreshold:
         #Selenium Pull
         prGreen('Selenium Pull Request...')
@@ -170,7 +170,8 @@ def get_content(url):
     # apply final regex clean up before summarising
     results = re.sub(r"\{(.*?)\}+", '', results) #removes anything enclosing {}
     results = re.sub(r"(#[A-Za-z]+)",'', results) #removes hashtags
-    results = re.sub(r"(^.+@[^\.].*\.[a-z]{2,}$",'', results)  #removes email
+    results = re.sub(r"(^.+@[^\.].*\.[a-z]{2,}$)",'', results)  #removes email
+    print(results)
     results = summarize(results)
     prGreen('Summary results: \n')
     print(results)
@@ -204,11 +205,14 @@ mail= Mail(app)
 
 @app.route('/send-mail/', methods=['POST'])
 def send_mail():
+    receiver = []
     emailadd = request.form['email_address']
+    receiver = emailadd.split(',')
+    # receiver.append(emailadd.split(','))
     text = request.form['msg_txt']  # receives from html form as String
     filename = request.form['fileName']
     with app.open_resource('./static/user_pulls/Output_'+filename+'.xlsx') as fp:
-        msg = Message('Below is an Attached File of your Query Results', sender='textcruncher@gmail.com', recipients=emailadd)
+        msg = Message('Below is an Attached File of your Query Results', sender='textcruncher@gmail.com', recipients=receiver)
         msg.attach('Output_'+filename+'.xlsx', 'file/xlsx', fp.read())
         msg.body = text
         mail.send(msg)

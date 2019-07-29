@@ -1,16 +1,16 @@
 import sys
-# import codecs
+import pandas as pd
 import requests
+import os
+import re
 from bs4 import BeautifulSoup
 from gensim.summarization import summarize
-import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from flask_mail import Mail, Message
-import os
-import re
+
 
 """ --------------------Main Script-------------------------- """
 #Readability
@@ -36,6 +36,7 @@ chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
 sel_driver = webdriver.Chrome(executable_path=chromedriver_path,chrome_options=chrome_options)
 # sel_driver = webdriver.Chrome(executable_path='./static/ChromeDriverWin32/chromedriver.exe',chrome_options=chrome_options) #Local host Test
+
 def scrape(lst_query,filename):
 
     for query in lst_query:
@@ -75,10 +76,10 @@ def scrape(lst_query,filename):
                 sub_output.append(url)
             """attempts to get URL content"""
             try:
-                results = get_content(url) #gets content from URL
-                if results[1] != "":
-                    sub_output.append(results[0]) #Title
-                    sub_output.append(results[1]) #Main content
+                txt_summary = get_content(url) #gets content from URL
+                if txt_summary[1] != "":
+                    sub_output.append(txt_summary[0]) #Title
+                    sub_output.append(txt_summary[1]) #Main content
                     final_output.append(sub_output)
                     counter += 1
             except:
@@ -109,7 +110,32 @@ def scrape(lst_query,filename):
     writer.save()
     writer.close()
 
-#Main content Generator with BS4 and Selenium if BS4 fails to scrape
+def pullContent(soup):
+    print("Pulling")
+    results = ""
+    links = soup.select("p")
+    if (len(links) == 0):
+        for br_tag in soup.find_all('br'):
+            text = br_tag.previous_sibling
+            if (text != None):
+                links.append(text)
+            text = br_tag.next_sibling
+            if (text != None):
+                links.append(text)
+
+    for link in links:
+        try:
+            temp = link.text.strip()
+        except (UnicodeDecodeError):
+            temp = link.translate(non_bmp_map).strip()
+        except (TypeError):
+            continue
+        except:
+            temp = str(link).strip()
+        results = results + " " + temp
+    return results.strip()
+
+# Main content Generator with BS4 and Selenium if BS4 fails to scrape
 def get_content(url):
     prCyan('BS4 Pull Request...')
     headers = requests.utils.default_headers()
@@ -119,50 +145,28 @@ def get_content(url):
     r = requests.get(url)
     raw_html = r.content
     soup = BeautifulSoup(raw_html, 'html.parser')
-    results = ""
-    links = soup.select("body p")
+    results = pullContent(soup)
+    prGreen('BS4 Original Content:')
+    print(results)
     headers = soup.select("h1")
     header = ""
     if len(headers) != 0:
         header = headers[0].text
-    else:
-        header =""
+    if (("Forbidden" in header) or (header == "") or ("Access Denied" in header)):
+        header = "Title Could not be Retrieved due to Webpage Restrictions"
+    prCyan('Title:')
+    print(header)
     final_text_summary = []
-    for link in links:
-        try:
-            temp = link.text
-        except(UnicodeEncodeError):
-            temp = link.translate(non_bmp_map)
-        except:
-            continue
 
-        results = results + temp
-    prGreen('BS4 Original Content:')
-    print(results)
-    #Check if content can be pulled with BS4
+    # Check if content can be pulled with BS4
     """word count minimum"""
     validThreshold = 300
     if len(results.split(" ")) < validThreshold:
-        #Selenium Pull
-        prGreen('Selenium Pull Request...')
+        # Selenium Pull
         sel_driver.implicitly_wait(1)  # reduce error
         sel_driver.get(url)
         soup = BeautifulSoup(sel_driver.page_source, "html.parser")
-        results = ""
-        links = soup.select("body p")
-        if len(headers) != 0:
-            header = headers[0].text
-        else:
-            header = ""
-        for link in links:
-            try:
-                temp = link.text
-            except(UnicodeEncodeError):
-                try:
-                    temp = link.translate(non_bmp_map)
-                except:
-                    continue
-            results = results + temp
+        results = pullContent(soup)
         prCyan('Selenium Original Content:')
         print(results)
 
@@ -171,13 +175,16 @@ def get_content(url):
     results = re.sub(r"\{(.*?)\}+", '', results) #removes anything enclosing {}
     results = re.sub(r"(#[A-Za-z]+)",'', results) #removes hashtags
     results = re.sub(r"(^.+@[^\.].*\.[a-z]{2,}$)",'', results)  #removes email
+    prCyan('After Regex...')
     print(results)
-    results = summarize(results)
-    prGreen('Summary results: \n')
-    print(results)
+    final_results = summarize(results)
+    prCyan('With text summary:')
+    print(final_results)
     final_text_summary.append(header)
-    final_text_summary.append(results)
+    final_text_summary.append(final_results)
+
     return final_text_summary
+
 
 
 """-------------------------------FLASK APPLICATION------------------------------------"""

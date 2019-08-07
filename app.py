@@ -87,7 +87,7 @@ def scrape(lst_query,filename):
                 continue
         prCyan("sleeping")
         time.sleep(2)  # sleep so that it will simulate actual human activity
-        prCyan("Resuming and resetting chromedriver")
+        prCyan("Resuming")
 
     # Output to Excel File
     df_results = pd.DataFrame(final_output, columns=final_header)
@@ -147,8 +147,19 @@ def get_content(url):
     headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
     })
-    r = requests.get(url)
-    raw_html = r.content
+    page = ''
+    while page == '':
+        try:
+            page = requests.get(url)
+            break
+        except:
+            print("Connection refused by the server..")
+            print("Let me sleep for 5 seconds")
+            print("ZZzzzz...")
+            time.sleep(5)
+            print("Was a nice sleep, now let me continue...")
+            continue
+    raw_html = page.content
     soup = BeautifulSoup(raw_html, 'html.parser')
     results = pullContent(soup)
     prGreen('BS4 Original Content:')

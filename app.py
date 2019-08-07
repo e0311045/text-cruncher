@@ -12,7 +12,6 @@ from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from flask_mail import Mail, Message
 
-
 """ --------------------Main Script-------------------------- """
 #Readability
 def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
@@ -264,6 +263,6 @@ def about():
 
 #runs the application in debug mode
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 4000))
     app.run(host='0.0.0.0', port=port)
     # app.run(debug=True)

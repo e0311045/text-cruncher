@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import os
 import re
+import time
 from bs4 import BeautifulSoup
 from gensim.summarization import summarize
 from selenium import webdriver
@@ -30,7 +31,7 @@ chrome_options = Options()
 chrome_options.binary_location = google_chrome_bin
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--start-maximized")
-# chrome_options.add_argument("-incognito")
+chrome_options.add_argument("-incognito")
 chrome_options.add_argument("--disable-popup-blocking")
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
@@ -84,6 +85,9 @@ def scrape(lst_query,filename):
                     counter += 1
             except:
                 continue
+        prCyan("sleeping")
+        time.sleep(2)  # sleep so that it will simulate actual human activity
+        prCyan("Resuming and resetting chromedriver")
 
     # Output to Excel File
     df_results = pd.DataFrame(final_output, columns=final_header)
@@ -109,6 +113,7 @@ def scrape(lst_query,filename):
     df_results = None
     writer.save()
     writer.close()
+    sel_driver.quit() #closes all instances of sel_driver
 
 def pullContent(soup):
     print("Pulling")
@@ -152,7 +157,7 @@ def get_content(url):
     header = ""
     if len(headers) != 0:
         header = headers[0].text
-    if (("Forbidden" in header) or (header == "") or ("Access Denied" in header)):
+    if (("Forbidden" in header) or (header == "") or ("Access Denied" in header) or ("400 Bad Request" in header) or ("Error" in header)):
         header = "Title Could not be Retrieved due to Webpage Restrictions"
     prCyan('Title:')
     print(header)
@@ -248,6 +253,6 @@ def about():
 
 #runs the application in debug mode
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
-    # app.run(debug=True)
+    # port = int(os.environ.get('PORT', 5000))
+    # app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
